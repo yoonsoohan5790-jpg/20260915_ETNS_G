@@ -1,0 +1,281 @@
+<title>ETNS 할 일 앱 이야기</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+
+  :root{
+    --bg:#f6f4fb;
+    --surface:#ffffff;
+    --ink:#221f33;
+    --muted:#645f7a;
+    --line:#e7e2f5;
+    --accent:#7c5cff;
+    --accent-deep:#5a3fd9;
+    --accent-soft:#efeafd;
+    --tip-bg:#2c2743;
+    --tip-ink:#f3f1fb;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#191726;
+      --surface:#221f33;
+      --ink:#eeecf7;
+      --muted:#b3aecb;
+      --line:#332f4c;
+      --accent:#a58bff;
+      --accent-deep:#c3b0ff;
+      --accent-soft:#2b264a;
+      --tip-bg:#efeafd;
+      --tip-ink:#221f33;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#191726;
+    --surface:#221f33;
+    --ink:#eeecf7;
+    --muted:#b3aecb;
+    --line:#332f4c;
+    --accent:#a58bff;
+    --accent-deep:#c3b0ff;
+    --accent-soft:#2b264a;
+    --tip-bg:#efeafd;
+    --tip-ink:#221f33;
+  }
+
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Noto Sans KR",system-ui,sans-serif;
+    padding:52px 20px 90px;
+    line-height:1.6;
+  }
+  .page{ max-width:660px; margin:0 auto; display:flex; flex-direction:column; gap:52px; }
+
+  header{ display:flex; flex-direction:column; gap:16px; }
+  .eyebrow{
+    font-size:13px; font-weight:700; letter-spacing:.04em;
+    color:var(--accent-deep); text-transform:uppercase;
+  }
+  h1{
+    font-size:clamp(26px,5vw,36px);
+    font-weight:900;
+    line-height:1.35;
+    margin:0;
+    text-wrap:balance;
+  }
+  .lead{ color:var(--muted); font-size:16px; line-height:1.85; margin:0; max-width:56ch; }
+  .lead b{ color:var(--ink); }
+
+  section{ display:flex; flex-direction:column; gap:18px; }
+  h2{ font-size:20px; font-weight:700; margin:0; }
+  p{ margin:0; font-size:15.5px; line-height:1.85; color:var(--ink); }
+  p.sub{ color:var(--muted); }
+
+  /* ---- 비유 카드 ---- */
+  .cards{ display:flex; flex-direction:column; gap:14px; }
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:20px 22px;
+    display:flex;
+    gap:16px;
+    align-items:flex-start;
+  }
+  .card .badge{
+    flex:none;
+    width:44px; height:44px;
+    border-radius:12px;
+    background:var(--accent-soft);
+    color:var(--accent-deep);
+    display:flex; align-items:center; justify-content:center;
+    font-weight:900; font-size:17px;
+  }
+  .card .body{ display:flex; flex-direction:column; gap:6px; }
+  .card .name{ font-weight:700; font-size:15.5px; }
+  .card .name small{ font-weight:500; color:var(--muted); font-size:13px; }
+  .card p{ color:var(--muted); font-size:14.5px; }
+
+  /* ---- 흐름도 ---- */
+  .flow{
+    display:flex;
+    align-items:stretch;
+    gap:0;
+    flex-wrap:wrap;
+  }
+  .flow-step{
+    flex:1 1 150px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:18px 16px;
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    justify-content:center;
+  }
+  .flow-step .emoji{ font-size:26px; }
+  .flow-step .label{ font-weight:700; font-size:14.5px; }
+  .flow-step .sub{ font-size:12.5px; color:var(--muted); }
+  .flow-arrow{
+    flex:0 0 auto;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--accent);
+    font-size:20px;
+    padding:0 8px;
+  }
+  @media (max-width:560px){
+    .flow{ flex-direction:column; }
+    .flow-arrow{ transform:rotate(90deg); padding:4px 0; }
+  }
+
+  /* ---- 용어 툴팁 ---- */
+  .term{
+    position:relative;
+    border-bottom:1.5px dotted var(--accent);
+    cursor:help;
+    font-weight:600;
+    color:var(--accent-deep);
+  }
+  .term .tip{
+    position:absolute;
+    left:50%;
+    bottom:calc(100% + 8px);
+    transform:translateX(-50%) translateY(4px);
+    background:var(--tip-bg);
+    color:var(--tip-ink);
+    padding:9px 12px;
+    border-radius:9px;
+    font-size:13px;
+    font-weight:500;
+    line-height:1.5;
+    width:max-content;
+    max-width:240px;
+    text-align:left;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .15s ease, transform .15s ease;
+    z-index:5;
+  }
+  .term:hover .tip, .term:focus .tip{ opacity:1; transform:translateX(-50%) translateY(0); }
+  .term:focus{ outline:none; }
+
+  /* ---- 사용법 ---- */
+  .steps{ display:flex; flex-direction:column; gap:12px; }
+  .step{ display:flex; gap:14px; align-items:flex-start; }
+  .step .num{
+    flex:none; width:28px; height:28px; border-radius:50%;
+    background:var(--accent); color:#fff; font-weight:700; font-size:13.5px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .step p{ padding-top:3px; }
+
+  .cta{
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--accent); color:#fff;
+    padding:13px 22px; border-radius:999px;
+    font-weight:700; font-size:15px;
+    text-decoration:none;
+    width:fit-content;
+  }
+  .cta:hover{ background:var(--accent-deep); }
+
+  .divider{ height:1px; background:var(--line); border:none; margin:0; }
+
+  footer{ display:flex; flex-direction:column; gap:8px; color:var(--muted); font-size:13px; }
+  footer a{ color:var(--accent-deep); font-weight:600; text-decoration:none; }
+  footer a:hover{ text-decoration:underline; }
+</style>
+
+<div class="page">
+
+  <header>
+    <div class="eyebrow">쉽게 보는 설명서</div>
+    <h1>내가 만든 할 일 앱은<br>어떻게 인터넷에 떴을까?</h1>
+    <p class="lead">
+      전문 용어 없이, <b>세 단계</b>로 설명해드릴게요.
+      코드를 짜서 → 인터넷에 열고 → 데이터를 저장하는 곳까지 연결하면
+      누구나 접속해서 쓸 수 있는 앱이 완성됩니다.
+    </p>
+  </header>
+
+  <section>
+    <h2>한눈에 보는 전체 흐름</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="emoji">📦</div>
+        <div class="label">① 코드 보관</div>
+        <div class="sub">GitHub</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="emoji">🌐</div>
+        <div class="label">② 인터넷에 열기</div>
+        <div class="sub">Vercel</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="emoji">🗄️</div>
+        <div class="label">③ 데이터 저장</div>
+        <div class="sub">Supabase</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>각 단계, 비유로 설명하면</h2>
+    <div class="cards">
+      <div class="card">
+        <div class="badge">1</div>
+        <div class="body">
+          <div class="name">GitHub — 원고를 보관하는 창고</div>
+          <p>앱을 만드는 데 쓴 <span class="term" tabindex="0">코드<span class="tip">컴퓨터에게 "이렇게 동작해라"라고 적어둔 글. 앱의 설계도 같은 것</span></span>를 안전하게 보관하는 창고예요. 나중에 수정하거나 여러 사람이 함께 작업할 때도 여기서 관리해요.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="badge">2</div>
+        <div class="body">
+          <div class="name">Vercel — 창고 원고를 실제 가게로 여는 곳</div>
+          <p>창고(GitHub)에 있는 코드를 가져다가, 인터넷 주소(URL)로 접속하면 실제로 화면이 뜨도록 <span class="term" tabindex="0">배포<span class="tip">완성된 프로그램을 사람들이 실제로 쓸 수 있게 인터넷에 올리는 것</span></span>해주는 서비스예요. 우리 앱의 진짜 "가게 문"이 여기예요.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="badge">3</div>
+        <div class="body">
+          <div class="name">Supabase — 손님들이 남긴 기록을 적어두는 장부</div>
+          <p>사람들이 앱에서 "할 일"을 추가하면, 그 내용을 어딘가엔 계속 기억해둬야겠죠. Supabase는 그 기록을 잃어버리지 않게 보관해주는 <span class="term" tabindex="0">데이터베이스<span class="tip">정보를 표(엑셀과 비슷한 형태)로 정리해서 저장해두는 시스템</span></span>예요.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>왜 하나로 합치지 않고 세 개나 썼을까요?</h2>
+    <p class="sub">
+      세 회사가 각자 제일 잘하는 일 하나씩만 맡고 있어서예요.
+      창고 회사는 보관을, 가게 자리를 빌려주는 회사는 손님 응대를, 장부 회사는 기록만 전문으로 하는 것과 비슷해요.
+      그래서 서로 <span class="term" tabindex="0">연동<span class="tip">서로 다른 서비스가 정보를 주고받을 수 있도록 연결하는 것</span></span>만 시켜주면, 각자 잘하는 일에 집중하면서도 하나의 앱처럼 동작하게 만들 수 있어요.
+    </p>
+  </section>
+
+  <hr class="divider">
+
+  <section>
+    <h2>그래서 지금 뭘 할 수 있나요?</h2>
+    <div class="steps">
+      <div class="step"><div class="num">1</div><p>아래 주소로 접속하면 할 일 목록 화면이 떠요.</p></div>
+      <div class="step"><div class="num">2</div><p>입력창에 할 일을 적고 "추가"를 누르면 목록에 저장돼요.</p></div>
+      <div class="step"><div class="num">3</div><p>체크박스를 누르면 완료 표시가 되고, "삭제"를 누르면 지워져요.</p></div>
+      <div class="step"><div class="num">4</div><p>이 모든 기록은 Supabase 장부에 저장되기 때문에, 나중에 다시 들어와도 그대로 남아있어요.</p></div>
+    </div>
+    <a class="cta" href="https://20260915-etns-v.vercel.app" target="_blank" rel="noopener">지금 앱 열어보기 →</a>
+  </section>
+
+  <footer>
+    <span>더 자세한 (기술적인) 진행 기록이 궁금하다면 아래 문서를 참고하세요.</span>
+    <a href="https://claude.ai/artifact/BAgKF9G7uPwsM3W6wn8RAm" target="_blank" rel="noopener">ETNS TODO 배포 기록 (상세판) →</a>
+  </footer>
+
+</div>

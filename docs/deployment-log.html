@@ -1,0 +1,440 @@
+<title>ETNS TODO 배포 기록</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --bg:#f3f4f8;
+    --surface:#ffffff;
+    --ink:#1a1d29;
+    --muted:#5c6274;
+    --faint:#8a90a0;
+    --line:#e1e3eb;
+    --accent:#4f46e5;
+    --accent-soft:#ecebfd;
+    --good:#0f7a54;
+    --good-soft:#e5f5ef;
+    --warn:#9a6400;
+    --warn-soft:#fdf1dc;
+    --code-bg:#f0f0f6;
+    --github:#24292f;
+    --vercel:#000000;
+    --supabase:#12805c;
+  }
+
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#14151c;
+      --surface:#1b1d27;
+      --ink:#e9eaf2;
+      --muted:#a3a8ba;
+      --faint:#787e91;
+      --line:#2c2f3c;
+      --accent:#8b85ff;
+      --accent-soft:#26234a;
+      --good:#4fd3a0;
+      --good-soft:#12291f;
+      --warn:#e0ad4b;
+      --warn-soft:#332a12;
+      --code-bg:#22242f;
+      --github:#e6e8ec;
+      --vercel:#e9eaf2;
+      --supabase:#4fd3a0;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#14151c;
+    --surface:#1b1d27;
+    --ink:#e9eaf2;
+    --muted:#a3a8ba;
+    --faint:#787e91;
+    --line:#2c2f3c;
+    --accent:#8b85ff;
+    --accent-soft:#26234a;
+    --good:#4fd3a0;
+    --good-soft:#12291f;
+    --warn:#e0ad4b;
+    --warn-soft:#332a12;
+    --code-bg:#22242f;
+    --github:#e6e8ec;
+    --vercel:#e9eaf2;
+    --supabase:#4fd3a0;
+  }
+
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"IBM Plex Sans KR","IBM Plex Sans",system-ui,sans-serif;
+    padding:48px 20px 80px;
+  }
+  code, .mono{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+  }
+
+  .page{
+    max-width:760px;
+    margin:0 auto;
+    display:flex;
+    flex-direction:column;
+    gap:44px;
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+  .eyebrow{
+    font-family:"IBM Plex Mono";
+    font-size:12.5px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--accent);
+    font-weight:600;
+  }
+  h1{
+    font-size:clamp(26px,4vw,34px);
+    line-height:1.25;
+    margin:0;
+    text-wrap:balance;
+    font-weight:700;
+  }
+  .subtitle{
+    color:var(--muted);
+    font-size:15px;
+    line-height:1.7;
+    max-width:62ch;
+    margin:0;
+  }
+
+  /* pipeline strip */
+  .pipeline{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:16px 18px;
+  }
+  .stage{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    padding:7px 12px;
+    border-radius:8px;
+    font-size:13.5px;
+    font-weight:600;
+    white-space:nowrap;
+  }
+  .stage .dot{ width:8px; height:8px; border-radius:50%; flex:none; }
+  .stage.gh{ background:color-mix(in srgb, var(--github) 8%, transparent); }
+  .stage.gh .dot{ background:var(--github); }
+  .stage.vc{ background:color-mix(in srgb, var(--vercel) 8%, transparent); }
+  .stage.vc .dot{ background:var(--vercel); }
+  .stage.sb{ background:color-mix(in srgb, var(--supabase) 12%, transparent); }
+  .stage.sb .dot{ background:var(--supabase); }
+  .arrow{ color:var(--faint); font-size:15px; }
+  .pipeline a{ color:inherit; text-decoration:none; }
+  .pipeline a:hover{ text-decoration:underline; }
+
+  /* ---------- Section shell ---------- */
+  section{ display:flex; flex-direction:column; gap:18px; }
+  .section-head{ display:flex; align-items:baseline; gap:10px; }
+  .section-head h2{
+    font-size:18px;
+    margin:0;
+    font-weight:700;
+  }
+  .section-head .tag{
+    font-family:"IBM Plex Mono";
+    font-size:12px;
+    color:var(--muted);
+  }
+
+  /* ---------- Timeline / git-log rail ---------- */
+  .timeline{
+    display:flex;
+    flex-direction:column;
+    gap:26px;
+    margin-left:6px;
+    padding-left:26px;
+    border-left:2px solid var(--line);
+  }
+  .node{ position:relative; display:flex; flex-direction:column; gap:8px; }
+  .node::before{
+    content:'';
+    position:absolute;
+    left:-32px;
+    top:5px;
+    width:11px; height:11px;
+    border-radius:50%;
+    background:var(--accent);
+    border:3px solid var(--bg);
+  }
+  .node.action::before{
+    border-radius:3px;
+    transform:rotate(45deg);
+    background:var(--faint);
+  }
+  .node-title{ font-weight:600; font-size:15px; }
+  .node-body{ color:var(--muted); font-size:14px; line-height:1.7; }
+  .node-body ul{ margin:6px 0 0; padding-left:18px; }
+  .node-body li{ margin:3px 0; }
+
+  .commit{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:var(--code-bg);
+    border:1px solid var(--line);
+    border-radius:7px;
+    padding:5px 10px;
+    font-family:"IBM Plex Mono";
+    font-size:12.5px;
+    width:fit-content;
+    max-width:100%;
+  }
+  .commit .hash{ color:var(--accent); font-weight:600; flex:none; }
+  .commit .msg{ color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  .who{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:12px;
+    font-weight:600;
+    padding:3px 9px;
+    border-radius:999px;
+    width:fit-content;
+  }
+  .who.me{ background:var(--accent-soft); color:var(--accent); }
+  .who.you{ background:var(--warn-soft); color:var(--warn); }
+
+  /* ---------- Result / verify callouts ---------- */
+  .verify{
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+    background:var(--good-soft);
+    border:1px solid color-mix(in srgb, var(--good) 30%, var(--line));
+    border-radius:10px;
+    padding:12px 14px;
+    font-size:13.5px;
+    color:var(--ink);
+  }
+  .verify b{ color:var(--good); }
+
+  .note{
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+    background:var(--warn-soft);
+    border:1px solid color-mix(in srgb, var(--warn) 35%, var(--line));
+    border-radius:10px;
+    padding:12px 14px;
+    font-size:13.5px;
+    color:var(--ink);
+  }
+  .note b{ color:var(--warn); }
+
+  /* ---------- Final architecture ---------- */
+  .stack{
+    display:flex;
+    flex-direction:column;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:12px;
+    overflow:hidden;
+  }
+  .stack-row{
+    display:grid;
+    grid-template-columns:120px 1fr;
+    gap:14px;
+    padding:16px 18px;
+    align-items:center;
+  }
+  .stack-row + .stack-row{ border-top:1px solid var(--line); }
+  .stack-label{
+    font-family:"IBM Plex Mono";
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:.03em;
+    color:var(--muted);
+    text-transform:uppercase;
+  }
+  .stack-value{ font-size:14px; }
+  .stack-value a{ color:var(--accent); font-weight:600; text-decoration:none; }
+  .stack-value a:hover{ text-decoration:underline; }
+  .stack-value .project{ font-family:"IBM Plex Mono"; font-size:13px; color:var(--faint); }
+
+  footer{
+    color:var(--faint);
+    font-size:12.5px;
+    text-align:center;
+    padding-top:8px;
+  }
+
+  @media (max-width:520px){
+    .stack-row{ grid-template-columns:1fr; gap:4px; }
+    body{ padding:32px 16px 64px; }
+  }
+</style>
+
+<div class="page">
+
+  <header>
+    <div class="eyebrow">Deployment Log · 2026-09-15</div>
+    <h1>ETNS 할 일 관리 앱, 로컬에서 실서비스까지</h1>
+    <p class="subtitle">
+      Flask로 만든 할 일 관리 웹앱을 GitHub에 올리고, Vercel로 배포하고,
+      Supabase(Postgres)에 실제 데이터를 저장하기까지의 전체 과정 기록입니다.
+    </p>
+    <div class="pipeline">
+      <a class="stage gh" href="https://github.com/yoonsoohan5790-jpg/20260915_ETNS_G" target="_blank" rel="noopener"><span class="dot"></span>GitHub · 20260915_ETNS_G</a>
+      <span class="arrow">→</span>
+      <a class="stage vc" href="https://20260915-etns-v.vercel.app" target="_blank" rel="noopener"><span class="dot"></span>Vercel · 20260915_ETNS_V</a>
+      <span class="arrow">→</span>
+      <span class="stage sb"><span class="dot"></span>Supabase · 20260915_ETNS_S</span>
+    </div>
+  </header>
+
+  <section>
+    <div class="section-head">
+      <h2>A. 로컬 개발</h2>
+      <span class="tag">ETNS_TODO_APP/</span>
+    </div>
+    <div class="timeline">
+      <div class="node">
+        <span class="who me">Claude</span>
+        <div class="node-title">Flask 앱 뼈대 구성</div>
+        <div class="node-body">
+          <code>app.py</code>(라우팅·SQLite), <code>templates/index.html</code>, <code>static/style.css</code>,
+          <code>requirements.txt</code> 작성. 브라우저에서 할 일 추가·완료·삭제를 직접 눌러보며 동작 확인.
+        </div>
+        <div class="commit"><span class="hash">77a0aed</span><span class="msg">Initial commit: ETNS TODO Flask app</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>B. GitHub 업로드</h2>
+      <span class="tag">20260915_ETNS_G</span>
+    </div>
+    <div class="timeline">
+      <div class="node action">
+        <span class="who you">사용자</span>
+        <div class="node-title">GitHub에 신규 저장소 생성</div>
+        <div class="node-body">github.com/new 에서 <code>20260915_ETNS_G</code> (Public), README 없이 빈 저장소로 생성</div>
+      </div>
+      <div class="node">
+        <span class="who me">Claude</span>
+        <div class="node-title">로컬 저장소 초기화 &amp; 푸시</div>
+        <div class="node-body">
+          <code>.gitignore</code> 작성 → <code>git init</code> → 첫 커밋 → 원격 연결 → <code>git push -u origin main</code>
+        </div>
+        <div class="verify">✓ <span><b>확인됨</b> — GitHub 저장소 페이지에서 app.py / templates / static 파일 정상 노출</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>C. Vercel 배포</h2>
+      <span class="tag">20260915_ETNS_V</span>
+    </div>
+    <div class="timeline">
+      <div class="node action">
+        <span class="who you">사용자</span>
+        <div class="node-title">Vercel에서 GitHub 저장소 Import</div>
+        <div class="node-body">vercel.com/new → GitHub 로그인 연동 → <code>20260915_ETNS_G</code> 선택 → 프로젝트명 <code>20260915_ETNS_V</code>로 배포</div>
+      </div>
+      <div class="node">
+        <span class="who me">Claude</span>
+        <div class="node-title">서버리스 환경 대응 설정 추가</div>
+        <div class="node-body">
+          <code>vercel.json</code>(Python 런타임 지정) 추가, DB 경로를 <code>/tmp</code>로 우회
+          — Vercel은 배포 폴더가 읽기 전용이라 원래 경로엔 파일을 쓸 수 없음
+        </div>
+        <div class="commit"><span class="hash">1dda4d1</span><span class="msg">Add Vercel deployment config</span></div>
+        <div class="note">⚠ <span><b>1차 배포 후 발견된 문제</b> — 서버리스는 요청마다 다른 인스턴스가 뜰 수 있어, 할 일을 추가해도 새로고침하면 사라짐</span></div>
+      </div>
+      <div class="node action">
+        <span class="who you">사용자</span>
+        <div class="node-title">Vercel KV(Upstash Redis) 스토리지 연결</div>
+        <div class="node-body">Storage 탭 → Create Database → KV → 프로젝트에 연결 (환경변수 자동 주입) → Redeploy</div>
+      </div>
+      <div class="node">
+        <span class="who me">Claude</span>
+        <div class="node-title">KV 저장 백엔드 구현</div>
+        <div class="node-body"><code>storage.py</code> 분리, KV 연결 시 그쪽에 저장하도록 전환</div>
+        <div class="commit"><span class="hash">09105c0</span><span class="msg">Add Vercel KV storage backend for persistent todos</span></div>
+        <div class="verify">✓ <span><b>확인됨</b> — 배포 사이트에서 항목 추가 후 새로고침해도 유지</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>D. Supabase 연동</h2>
+      <span class="tag">20260915_ETNS_S</span>
+    </div>
+    <div class="timeline">
+      <div class="node">
+        <span class="who me">Claude</span>
+        <div class="node-title">Supabase(Postgres) 저장 백엔드 추가</div>
+        <div class="node-body">
+          <code>storage.py</code>에 Supabase REST(PostgREST) 연동 추가 — 연결 시 KV보다 우선 사용.
+          <code>supabase/schema.sql</code>에 <code>todos</code> 테이블 생성 스크립트 작성
+        </div>
+        <div class="commit"><span class="hash">aa673ff</span><span class="msg">Add Supabase (Postgres) storage backend</span></div>
+      </div>
+      <div class="node action">
+        <span class="who you">사용자</span>
+        <div class="node-title">Supabase 프로젝트 생성 &amp; 연결</div>
+        <div class="node-body">
+          <ul>
+            <li>supabase.com/dashboard → 신규 프로젝트 <code>20260915_ETNS_S</code> 생성</li>
+            <li>SQL Editor에서 <code>schema.sql</code> 실행 → <code>todos</code> 테이블 생성</li>
+            <li>Project Settings → API Keys에서 Project URL / Publishable(anon) key 확인</li>
+            <li>Vercel → Settings → Environment Variables에 <code>SUPABASE_URL</code>, <code>SUPABASE_KEY</code> 등록 → Redeploy</li>
+          </ul>
+        </div>
+      </div>
+      <div class="node">
+        <span class="who me">Claude</span>
+        <div class="node-title">최종 검증</div>
+        <div class="node-body">새 브라우저 탭에서 항목 2개 추가 → 완료 체크(정렬 변경 확인) → 삭제 → 재접속까지 전 과정 확인</div>
+        <div class="verify">✓ <span><b>확인됨</b> — 완료 처리 시 목록 재정렬(Postgres ORDER BY 반영), 삭제·재접속 후 데이터 정합성 유지</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>최종 구조</h2></div>
+    <div class="stack">
+      <div class="stack-row">
+        <span class="stack-label">코드</span>
+        <span class="stack-value"><a href="https://github.com/yoonsoohan5790-jpg/20260915_ETNS_G" target="_blank" rel="noopener">github.com/yoonsoohan5790-jpg/20260915_ETNS_G</a></span>
+      </div>
+      <div class="stack-row">
+        <span class="stack-label">배포</span>
+        <span class="stack-value"><a href="https://20260915-etns-v.vercel.app" target="_blank" rel="noopener">20260915-etns-v.vercel.app</a> <span class="project">(project: 20260915_ETNS_V)</span></span>
+      </div>
+      <div class="stack-row">
+        <span class="stack-label">데이터</span>
+        <span class="stack-value">Supabase Postgres <span class="project">(project: 20260915_ETNS_S · table: todos)</span></span>
+      </div>
+    </div>
+    <div class="note">
+      ⚠ <span><b>참고</b> — <code>todos</code> 테이블은 교육용 데모라 인증 없이 anon key로 누구나 읽고 쓸 수 있는 공개 정책(RLS open policy)으로 설정했습니다. 실제 서비스라면 로그인 기반 정책으로 바꿔야 합니다.</span>
+    </div>
+  </section>
+
+  <footer>Etners_VIBE · ETNS_TODO_APP</footer>
+
+</div>
