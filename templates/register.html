@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>회원가입 - ETNS TODO</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>📝 ETNS 할 일 관리</h1>
+    <h2 class="auth-title">회원가입</h2>
+
+    {% if error %}
+    <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <form action="{{ url_for('register') }}" method="post" class="auth-form">
+      <input type="email" name="email" placeholder="이메일" autocomplete="username" required>
+      <input type="password" name="password" placeholder="비밀번호 (4자 이상)" autocomplete="new-password" required>
+      <button type="submit">가입하기</button>
+    </form>
+
+    <p class="auth-switch">이미 계정이 있으신가요? <a href="{{ url_for('login') }}">로그인</a></p>
+  </div>
+</body>
+</html>

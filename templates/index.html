@@ -8,7 +8,13 @@
 </head>
 <body>
   <div class="container">
-    <h1>📝 ETNS 할 일 관리</h1>
+    <div class="topbar">
+      <h1>📝 ETNS 할 일 관리</h1>
+      <form action="{{ url_for('logout') }}" method="post" class="logout-form">
+        <span class="who">{{ email }}</span>
+        <button type="submit" class="logout-btn">로그아웃</button>
+      </form>
+    </div>
 
     <form action="{{ url_for('add') }}" method="post" class="add-form">
       <input type="text" name="title" placeholder="할 일을 입력하세요" autocomplete="off" required>

@@ -23,9 +23,107 @@ body {
 }
 
 h1 {
-  margin: 0 0 20px;
+  margin: 0;
   font-size: 22px;
   text-align: center;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.topbar h1 {
+  flex: 1;
+  text-align: left;
+}
+
+.logout-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.who {
+  font-size: 12px;
+  color: #a0a4ab;
+  white-space: nowrap;
+}
+
+.logout-btn {
+  background: none;
+  border: 1px solid #d7dae0;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #5a5f6b;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background: #f4f5f7;
+}
+
+.auth-title {
+  margin: 0 0 20px;
+  font-size: 15px;
+  text-align: center;
+  color: #5a5f6b;
+  font-weight: 500;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.auth-form input {
+  padding: 10px 12px;
+  border: 1px solid #d7dae0;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.auth-form button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #6c5ce7;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.auth-form button:hover {
+  background: #5a4bd1;
+}
+
+.auth-switch {
+  margin: 18px 0 0;
+  text-align: center;
+  font-size: 13px;
+  color: #5a5f6b;
+}
+
+.auth-switch a {
+  color: #6c5ce7;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.error {
+  background: #fdecea;
+  color: #c0392b;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  margin: 0 0 16px;
 }
 
 .add-form {
