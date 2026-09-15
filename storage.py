@@ -1,9 +1,11 @@
 """
 할 일 데이터 저장소.
 
-- 로컬 개발 환경: SQLite 파일(todo.db)
-- Vercel 배포 환경: Vercel KV(Upstash Redis REST API) - 서버리스라 파일이 유지되지 않으므로 외부 저장소 사용
-  (Vercel 프로젝트에 KV 스토리지를 연결하면 KV_REST_API_URL / KV_REST_API_TOKEN 환경변수가 자동 주입됨)
+우선순위: Supabase(Postgres) > Vercel KV(Upstash Redis) > SQLite(로컬 개발용)
+
+- Supabase: SUPABASE_URL / SUPABASE_KEY 환경변수가 있으면 사용 (PostgREST REST API 직접 호출)
+- Vercel KV: KV_REST_API_URL / KV_REST_API_TOKEN 환경변수가 있으면 사용
+- SQLite: 위 둘 다 없을 때(로컬 개발) todo.db 파일 사용
 """
 
 import base64
@@ -17,12 +19,85 @@ import requests
 
 BASE_DIR = Path(__file__).resolve().parent
 
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+USE_SUPABASE = bool(SUPABASE_URL and SUPABASE_KEY)
+
 KV_URL = os.environ.get("KV_REST_API_URL")
 KV_TOKEN = os.environ.get("KV_REST_API_TOKEN")
 USE_KV = bool(KV_URL and KV_TOKEN)
 
 SQLITE_PATH = Path("/tmp/todo.db") if os.environ.get("VERCEL") else BASE_DIR / "todo.db"
 KV_KEY = "etns_todo_list"
+
+
+# ---------- Supabase (Postgres REST / PostgREST) ----------
+
+def _sb_headers(extra=None):
+    headers = {
+        "apikey": SUPABASE_KEY,
+        "Authorization": f"Bearer {SUPABASE_KEY}",
+        "Content-Type": "application/json",
+    }
+    if extra:
+        headers.update(extra)
+    return headers
+
+
+def _sb_list():
+    resp = requests.get(
+        f"{SUPABASE_URL}/rest/v1/todos",
+        headers=_sb_headers(),
+        params={"select": "*", "order": "done.asc,id.desc"},
+        timeout=5,
+    )
+    resp.raise_for_status()
+    return resp.json()
+
+
+def _sb_add(title):
+    resp = requests.post(
+        f"{SUPABASE_URL}/rest/v1/todos",
+        headers=_sb_headers({"Prefer": "return=minimal"}),
+        json={
+            "title": title,
+            "done": False,
+            "created_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        },
+        timeout=5,
+    )
+    resp.raise_for_status()
+
+
+def _sb_toggle(todo_id):
+    resp = requests.get(
+        f"{SUPABASE_URL}/rest/v1/todos",
+        headers=_sb_headers(),
+        params={"id": f"eq.{todo_id}", "select": "done"},
+        timeout=5,
+    )
+    resp.raise_for_status()
+    rows = resp.json()
+    if not rows:
+        return
+    resp = requests.patch(
+        f"{SUPABASE_URL}/rest/v1/todos",
+        headers=_sb_headers({"Prefer": "return=minimal"}),
+        params={"id": f"eq.{todo_id}"},
+        json={"done": not rows[0]["done"]},
+        timeout=5,
+    )
+    resp.raise_for_status()
+
+
+def _sb_delete(todo_id):
+    resp = requests.delete(
+        f"{SUPABASE_URL}/rest/v1/todos",
+        headers=_sb_headers({"Prefer": "return=minimal"}),
+        params={"id": f"eq.{todo_id}"},
+        timeout=5,
+    )
+    resp.raise_for_status()
 
 
 # ---------- Vercel KV (Upstash Redis REST) ----------
@@ -75,11 +150,13 @@ def _sqlite_load():
 # ---------- 공개 함수 (app.py 에서 사용) ----------
 
 def init():
-    if not USE_KV:
+    if not USE_SUPABASE and not USE_KV:
         _sqlite_init()
 
 
 def list_todos():
+    if USE_SUPABASE:
+        return _sb_list()
     if USE_KV:
         todos = _kv_load()
         return sorted(todos, key=lambda t: (t["done"], -t["id"]))
@@ -87,6 +164,10 @@ def list_todos():
 
 
 def add_todo(title):
+    if USE_SUPABASE:
+        _sb_add(title)
+        return
+
     if USE_KV:
         todos = _kv_load()
         next_id = (max((t["id"] for t in todos), default=0)) + 1
@@ -110,6 +191,10 @@ def add_todo(title):
 
 
 def toggle_todo(todo_id):
+    if USE_SUPABASE:
+        _sb_toggle(todo_id)
+        return
+
     if USE_KV:
         todos = _kv_load()
         for t in todos:
@@ -124,6 +209,10 @@ def toggle_todo(todo_id):
 
 
 def delete_todo(todo_id):
+    if USE_SUPABASE:
+        _sb_delete(todo_id)
+        return
+
     if USE_KV:
         todos = [t for t in _kv_load() if t["id"] != todo_id]
         _kv_save(todos)
