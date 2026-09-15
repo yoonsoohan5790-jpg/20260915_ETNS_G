@@ -1,3 +1,4 @@
+import os
 import sqlite3
 from datetime import datetime
 from pathlib import Path
@@ -5,7 +6,8 @@ from pathlib import Path
 from flask import Flask, g, redirect, render_template, request, url_for
 
 BASE_DIR = Path(__file__).resolve().parent
-DB_PATH = BASE_DIR / "todo.db"
+# Vercel의 서버리스 환경은 배포 디렉터리가 읽기 전용이라 /tmp 에만 쓸 수 있음
+DB_PATH = Path("/tmp/todo.db") if os.environ.get("VERCEL") else BASE_DIR / "todo.db"
 
 app = Flask(__name__)
 
@@ -79,6 +81,7 @@ def delete(todo_id):
     return redirect(url_for("index"))
 
 
+init_db()
+
 if __name__ == "__main__":
-    init_db()
     app.run(debug=True, port=5000)
