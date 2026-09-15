@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ETNS TODO</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>📝 ETNS 할 일 관리</h1>
+
+    <form action="{{ url_for('add') }}" method="post" class="add-form">
+      <input type="text" name="title" placeholder="할 일을 입력하세요" autocomplete="off" required>
+      <button type="submit">추가</button>
+    </form>
+
+    {% if todos %}
+    <ul class="todo-list">
+      {% for todo in todos %}
+      <li class="{{ 'done' if todo['done'] else '' }}">
+        <form action="{{ url_for('toggle', todo_id=todo['id']) }}" method="post" class="toggle-form">
+          <button type="submit" class="check-btn">{{ '✅' if todo['done'] else '⬜' }}</button>
+        </form>
+        <span class="title">{{ todo['title'] }}</span>
+        <span class="date">{{ todo['created_at'] }}</span>
+        <form action="{{ url_for('delete', todo_id=todo['id']) }}" method="post" class="delete-form">
+          <button type="submit" class="delete-btn">삭제</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="empty">등록된 할 일이 없습니다.</p>
+    {% endif %}
+  </div>
+</body>
+</html>
